@@ -19,7 +19,7 @@ const Index = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background bg-dots">
       <ScrollProgress />
       <Navbar onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} sidebarOpen={sidebarOpen} />
       <TableOfContents open={sidebarOpen} />
@@ -44,7 +44,9 @@ const Index = () => {
         </div>
       </main>
 
-      <Footer />
+      <div className={`transition-all duration-300 ${sidebarOpen ? "lg:ml-64" : ""}`}>
+        <Footer />
+      </div>
     </div>
   );
 };
