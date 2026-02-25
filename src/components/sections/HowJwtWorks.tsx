@@ -10,7 +10,7 @@ const HowJwtWorks = () => (
           step: 1, title: "User Logs In", emoji: "👤",
           desc: "Client sends username & password to the server.",
           code: `POST /api/login
-{ "username": "alice", "password": "securePass123" }`,
+{ "username": "wail", "password": "securePass123" }`,
         },
         {
           step: 2, title: "Server Issues Token", emoji: "🔐",
@@ -34,7 +34,7 @@ const HowJwtWorks = () => (
           step: 5, title: "Server Verifies", emoji: "✅",
           desc: "Server decodes the token, checks the signature, and responds.",
           code: `const user = jwt.verify(token, SECRET_KEY);
-// { user: "alice", role: "admin" } → Access granted!`,
+// { user: "wail", role: "admin" } → Access granted!`,
         },
       ].map((s) => (
         <div key={s.step} className="flex gap-4">
