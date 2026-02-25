@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Check, Copy } from "lucide-react";
+import { Check, Copy, Terminal } from "lucide-react";
 
 interface CodeBlockProps {
   code: string;
@@ -17,17 +17,20 @@ const CodeBlock = ({ code, language = "javascript", title }: CodeBlockProps) => 
   };
 
   return (
-    <div className="rounded-lg overflow-hidden border border-border my-4">
-      <div className="flex items-center justify-between px-4 py-2 bg-code-header">
-        <span className="text-xs font-mono text-code-fg/70">{title || language}</span>
+    <div className="rounded-xl overflow-hidden border border-border my-4 glow-purple-sm">
+      <div className="flex items-center justify-between px-4 py-2.5 bg-code-header">
+        <div className="flex items-center gap-2">
+          <Terminal className="w-3.5 h-3.5 text-primary/70" />
+          <span className="text-xs font-mono text-muted-foreground">{title || language}</span>
+        </div>
         <button
           onClick={handleCopy}
-          className="flex items-center gap-1.5 text-xs text-code-fg/70 hover:text-code-fg transition-colors"
+          className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors"
         >
           {copied ? (
             <>
-              <Check className="w-3.5 h-3.5" />
-              Copied!
+              <Check className="w-3.5 h-3.5 text-success" />
+              <span className="text-success">Copied!</span>
             </>
           ) : (
             <>
@@ -37,7 +40,7 @@ const CodeBlock = ({ code, language = "javascript", title }: CodeBlockProps) => 
           )}
         </button>
       </div>
-      <pre className="p-4 overflow-x-auto !rounded-none !rounded-b-lg">
+      <pre className="p-4 overflow-x-auto !rounded-none !rounded-b-xl">
         <code>{code}</code>
       </pre>
     </div>

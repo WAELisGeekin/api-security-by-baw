@@ -1,118 +1,108 @@
 import { useState } from "react";
-import { Play, Globe, Lock, LogIn, ShieldCheck } from "lucide-react";
+import { Play, Globe, Lock, LogIn, ShieldCheck, Trash2 } from "lucide-react";
 import SectionCard from "../SectionCard";
 
-type LogEntry = { type: "success" | "error" | "info"; message: string; status?: number };
+type LogEntry = { type: "success" | "error" | "info"; message: string; status?: number; time: string };
 
 const InteractiveDemo = () => {
   const [token, setToken] = useState<string | null>(null);
   const [logs, setLogs] = useState<LogEntry[]>([]);
+  const [animating, setAnimating] = useState<string | null>(null);
 
-  const addLog = (entry: LogEntry) => setLogs((prev) => [...prev, entry]);
+  const now = () => new Date().toLocaleTimeString();
+  const addLog = (entry: Omit<LogEntry, "time">) => setLogs((prev) => [...prev, { ...entry, time: now() }]);
   const clearLogs = () => { setLogs([]); setToken(null); };
 
-  const accessPublicApi = () => {
-    addLog({ type: "info", message: "GET /api/public/data" });
-    setTimeout(() => {
-      addLog({
-        type: "success",
-        status: 200,
-        message: '{ "data": "Public weather data", "temp": "24°C", "city": "Riyadh" }',
-      });
-    }, 500);
+  const animateBtn = (id: string, fn: () => void) => {
+    setAnimating(id);
+    setTimeout(() => { fn(); setAnimating(null); }, 600);
   };
 
-  const accessSecureWithoutToken = () => {
-    addLog({ type: "info", message: "GET /api/secure/profile  (No token)" });
-    setTimeout(() => {
-      addLog({
-        type: "error",
-        status: 401,
-        message: '{ "error": "Unauthorized — No token provided" }',
-      });
-    }, 500);
-  };
+  const accessPublicApi = () => animateBtn("public", () => {
+    addLog({ type: "info", message: "→ GET /api/public/weather" });
+    setTimeout(() => addLog({ type: "success", status: 200, message: '✓ { "temp": "24°C", "city": "Riyadh", "condition": "Sunny" }' }), 400);
+  });
 
-  const login = () => {
-    addLog({ type: "info", message: 'POST /api/login  { "user": "alice", "pass": "***" }' });
+  const accessSecureWithoutToken = () => animateBtn("no-token", () => {
+    addLog({ type: "info", message: "→ GET /api/secure/profile  (No Token)" });
+    setTimeout(() => addLog({ type: "error", status: 401, message: '✗ { "error": "Unauthorized — No token provided" }' }), 400);
+  });
+
+  const login = () => animateBtn("login", () => {
+    addLog({ type: "info", message: '→ POST /api/login  { user: "alice" }' });
     setTimeout(() => {
-      const fakeToken = "eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyIjoiYWxpY2UifQ.abc123";
+      const fakeToken = "eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyIjoiYWxpY2UiLCJyb2xlIjoiYWRtaW4ifQ.s3cr3t";
       setToken(fakeToken);
-      addLog({
-        type: "success",
-        status: 200,
-        message: `{ "token": "${fakeToken}" }`,
-      });
-    }, 800);
-  };
+      addLog({ type: "success", status: 200, message: `✓ Token received: ${fakeToken.slice(0, 30)}...` });
+    }, 700);
+  });
 
-  const accessSecureWithToken = () => {
-    if (!token) {
-      addLog({ type: "error", status: 401, message: "No token! Login first." });
-      return;
-    }
-    addLog({ type: "info", message: `GET /api/secure/profile  Authorization: Bearer ${token.slice(0, 20)}...` });
-    setTimeout(() => {
-      addLog({
-        type: "success",
-        status: 200,
-        message: '{ "user": "alice", "role": "admin", "email": "alice@univ.edu" }',
-      });
-    }, 500);
-  };
+  const accessSecureWithToken = () => animateBtn("with-token", () => {
+    if (!token) { addLog({ type: "error", status: 401, message: "✗ No token! Login first." }); return; }
+    addLog({ type: "info", message: `→ GET /api/secure/profile  [Bearer ${token.slice(0, 18)}...]` });
+    setTimeout(() => addLog({ type: "success", status: 200, message: '✓ { "user": "alice", "role": "admin", "email": "alice@univ.edu" }' }), 400);
+  });
+
+  const buttons = [
+    { id: "public", label: "Public API", icon: Globe, onClick: accessPublicApi, style: "bg-info/20 text-info border-info/30 hover:bg-info/30" },
+    { id: "no-token", label: "Secure (No Token)", icon: Lock, onClick: accessSecureWithoutToken, style: "bg-destructive/20 text-destructive border-destructive/30 hover:bg-destructive/30" },
+    { id: "login", label: "Login → Token", icon: LogIn, onClick: login, style: "gradient-hero text-primary-foreground border-transparent glow-purple-sm hover:opacity-90" },
+    { id: "with-token", label: "Secure + Token", icon: ShieldCheck, onClick: accessSecureWithToken, style: "bg-success/20 text-success border-success/30 hover:bg-success/30" },
+  ];
 
   return (
-    <SectionCard id="demo" title="Interactive Demo" subtitle="Try simulated API requests — see the difference!" icon={Play}>
-      <p className="text-sm text-muted-foreground mb-4">
-        Click the buttons below to simulate real API calls. Watch the console to see how public
-        and secure APIs respond differently.
+    <SectionCard id="demo" title="Interactive Demo" subtitle="Simulate real API requests — click & watch!" icon={Play} index={6}>
+      <p className="text-sm text-muted-foreground mb-5">
+        Click the buttons to simulate API calls. Follow the sequence: <span className="text-primary font-medium">Public → Secure (fail) → Login → Secure (success)</span>
       </p>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-4">
-        <button onClick={accessPublicApi} className="flex flex-col items-center gap-1.5 bg-accent hover:bg-accent/80 text-accent-foreground rounded-lg px-3 py-3 text-xs font-medium transition-colors border border-primary/20">
-          <Globe className="w-5 h-5" />
-          Access Public API
-        </button>
-        <button onClick={accessSecureWithoutToken} className="flex flex-col items-center gap-1.5 bg-destructive/10 hover:bg-destructive/20 text-destructive rounded-lg px-3 py-3 text-xs font-medium transition-colors border border-destructive/20">
-          <Lock className="w-5 h-5" />
-          Secure (No Token)
-        </button>
-        <button onClick={login} className="flex flex-col items-center gap-1.5 gradient-hero text-primary-foreground rounded-lg px-3 py-3 text-xs font-medium transition-colors">
-          <LogIn className="w-5 h-5" />
-          Login → Get Token
-        </button>
-        <button onClick={accessSecureWithToken} className="flex flex-col items-center gap-1.5 bg-primary text-primary-foreground rounded-lg px-3 py-3 text-xs font-medium transition-colors hover:opacity-90">
-          <ShieldCheck className="w-5 h-5" />
-          Secure (With Token)
-        </button>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-5">
+        {buttons.map((b) => (
+          <button
+            key={b.id}
+            onClick={b.onClick}
+            className={`flex flex-col items-center gap-2 rounded-xl px-3 py-4 text-xs font-semibold transition-all duration-200 border ${b.style} ${
+              animating === b.id ? "scale-95 opacity-80" : "hover:scale-[1.03]"
+            }`}
+          >
+            <b.icon className={`w-6 h-6 ${animating === b.id ? "animate-bounce" : ""}`} />
+            {b.label}
+          </button>
+        ))}
       </div>
 
       {token && (
-        <div className="bg-accent border border-primary/20 rounded-lg px-4 py-2 mb-4 text-xs font-mono text-primary break-all">
-          🔑 Token: {token}
+        <div className="bg-primary/10 border border-primary/20 rounded-xl px-4 py-3 mb-4 text-xs font-mono text-primary break-all animate-fade-in glow-purple-sm">
+          🔑 <span className="font-bold">Active Token:</span> {token}
         </div>
       )}
 
       {/* Console */}
-      <div className="bg-code-bg rounded-lg overflow-hidden">
-        <div className="flex items-center justify-between px-4 py-2 bg-code-header">
-          <span className="text-xs font-mono text-code-fg/70">API Console</span>
-          <button onClick={clearLogs} className="text-xs text-code-fg/50 hover:text-code-fg transition-colors">
-            Clear
+      <div className="bg-code-bg rounded-xl overflow-hidden border border-border glow-purple-sm">
+        <div className="flex items-center justify-between px-4 py-2.5 bg-code-header border-b border-border">
+          <div className="flex items-center gap-2">
+            <div className="flex gap-1.5">
+              <div className="w-2.5 h-2.5 rounded-full bg-destructive/60" />
+              <div className="w-2.5 h-2.5 rounded-full bg-warning/60" />
+              <div className="w-2.5 h-2.5 rounded-full bg-success/60" />
+            </div>
+            <span className="text-xs font-mono text-muted-foreground ml-2">API Console</span>
+          </div>
+          <button onClick={clearLogs} className="flex items-center gap-1 text-xs text-muted-foreground hover:text-destructive transition-colors">
+            <Trash2 className="w-3 h-3" /> Clear
           </button>
         </div>
-        <div className="p-4 font-mono text-xs space-y-1.5 min-h-[120px] max-h-[300px] overflow-y-auto">
+        <div className="p-4 font-mono text-xs space-y-1.5 min-h-[140px] max-h-[300px] overflow-y-auto">
           {logs.length === 0 && (
-            <span className="text-code-fg/30">// Click a button above to make an API request...</span>
+            <span className="text-muted-foreground/40">// Click a button above to make an API request...</span>
           )}
           {logs.map((log, i) => (
-            <div key={i} className={
-              log.type === "success" ? "text-green-400" :
-              log.type === "error" ? "text-red-400" :
-              "text-blue-400"
-            }>
-              {log.status && <span className="opacity-60">[{log.status}] </span>}
-              {log.message}
+            <div key={i} className={`animate-fade-in flex gap-2 ${
+              log.type === "success" ? "text-success" : log.type === "error" ? "text-destructive" : "text-info"
+            }`}>
+              <span className="text-muted-foreground/40 shrink-0">[{log.time}]</span>
+              {log.status && <span className="font-bold shrink-0">{log.status}</span>}
+              <span>{log.message}</span>
             </div>
           ))}
         </div>
