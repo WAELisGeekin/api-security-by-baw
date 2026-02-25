@@ -20,7 +20,7 @@ const InteractiveDemo = () => {
 
   const accessPublicApi = () => animateBtn("public", () => {
     addLog({ type: "info", message: "→ GET /api/public/weather" });
-    setTimeout(() => addLog({ type: "success", status: 200, message: '✓ { "temp": "24°C", "city": "Riyadh", "condition": "Sunny" }' }), 400);
+    setTimeout(() => addLog({ type: "success", status: 200, message: '✓ { "temp": "24°C", "city": "SBA", "condition": "Sunny" }' }), 400);
   });
 
   const accessSecureWithoutToken = () => animateBtn("no-token", () => {
@@ -29,7 +29,7 @@ const InteractiveDemo = () => {
   });
 
   const login = () => animateBtn("login", () => {
-    addLog({ type: "info", message: '→ POST /api/login  { user: "alice" }' });
+    addLog({ type: "info", message: '→ POST /api/login  { user: "yassine" }' });
     setTimeout(() => {
       const fakeToken = "eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyIjoiYWxpY2UiLCJyb2xlIjoiYWRtaW4ifQ.s3cr3t";
       setToken(fakeToken);
@@ -40,7 +40,7 @@ const InteractiveDemo = () => {
   const accessSecureWithToken = () => animateBtn("with-token", () => {
     if (!token) { addLog({ type: "error", status: 401, message: "✗ No token! Login first." }); return; }
     addLog({ type: "info", message: `→ GET /api/secure/profile  [Bearer ${token.slice(0, 18)}...]` });
-    setTimeout(() => addLog({ type: "success", status: 200, message: '✓ { "user": "alice", "role": "admin", "email": "alice@univ.edu" }' }), 400);
+    setTimeout(() => addLog({ type: "success", status: 200, message: '✓ { "user": "yassine", "role": "admin", "email": "ysn@univ.sba" }' }), 400);
   });
 
   const buttons = [
