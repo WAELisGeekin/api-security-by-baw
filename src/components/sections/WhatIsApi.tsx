@@ -55,7 +55,7 @@ const response = await fetch("https://api.weather.com/current");
 const data = await response.json();
 
 console.log(data);
-// { temp: "24°C", city: "Riyadh", condition: "Sunny" }`}
+// { temp: "24°C", city: "SBA", condition: "Sunny" }`}
     />
   </SectionCard>
 );
