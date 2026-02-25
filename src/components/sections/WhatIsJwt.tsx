@@ -43,7 +43,7 @@ const WhatIsJwt = () => (
         <p className="text-xs text-muted-foreground mb-2">User data & claims</p>
         <CodeBlock code={`{
   "sub": "1234",
-  "name": "Alice",
+  "name": "Wail",
   "role": "admin",
   "exp": 1716239022
 }`} title="Payload" />
